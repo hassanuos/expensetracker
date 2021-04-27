@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>{{title}}</ion-title>
+    <ion-button fill="outline" (click)="dismissModal()" slot="end">
+      x
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-card>
+    <iframe allowfullscreen="" frameborder="0" height="200" [src]="makeVideoURL()" style="width: 100%"></iframe>
+    <ion-footer>
+      <ion-card-header style="font-size: medium;font-weight: bold">
+        {{title}}
+      </ion-card-header>
+    </ion-footer>
+  </ion-card>
+</ion-content>

@@ -24,6 +24,10 @@ const routes: Routes = [
         loadChildren: () => import('../pages/accounts/accounts.module').then(m => m.AccountsModule)
       },
       {
+        path: 'youtube',
+        loadChildren: () => import('../pages/youtubesearch/youtubesearch.module').then(m => m.YoutubesearchModule)
+      },
+      {
         path: '',
         redirectTo: '/tabs/dashboard',
         pathMatch: 'full'
