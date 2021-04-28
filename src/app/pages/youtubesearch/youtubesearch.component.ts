@@ -4,6 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import {ModalController} from "@ionic/angular";
 import {PlayvideoComponent} from "../playvideo/playvideo.component";
 import {environment} from "../../../environments/environment";
+import {Observable} from "rxjs";
+import {map, switchMap, debounceTime, distinctUntilChanged, filter} from "rxjs/operators";
 
 @Component({
   selector: 'app-youtubesearch',
@@ -15,34 +17,50 @@ export class YoutubesearchComponent implements OnInit {
   constructor(private http: HttpClient, private modalController: ModalController) { }
 
   ytsearch = new FormControl('', Validators.required);
-  results: Array<Object> = [] ;
-  pageToken: string;
+  // results: Array<Object> = [] ;
+  results: Observable<any>;
 
-  ngOnInit() {
+
+    ngOnInit() {
       this.searchTextChanges();
       console.log(this.ytsearch.value);
   }
 
   searchTextChanges(event?):void {
-      this.ytsearch.valueChanges.subscribe((searchtxt) => {
 
-          this.http.get<any>(`${environment.youtube.baseUrl}?q=${searchtxt}&key=${environment.youtube.apiKey}&part=snippet`).subscribe((result) => {
-              console.log(result);
-              this.pageToken = result.nextPageToken;
-              // this.results = result.items;
-              result.items.forEach(video => {
-                  this.results.push(video);
-              });
+      // filter and distinctUntilChanged not working.
+      // ------------------------------------------------------------------
 
-              // If event exists
-              if (event) {
-                  event.target.complete();
-              }
+      // this.ytsearch.valueChanges.pipe(
+      //     debounceTime(500),
+      //     filter(value => value.length > 3),
+      //     distinctUntilChanged(),
+      //     switchMap(searchTerm => this.http.get<any>(`${environment.youtube.baseUrl}?q=${searchTerm}&key=${environment.youtube.apiKey}&part=snippet`)),
+      //     map(response => response.items)
+      // );
 
-          });
+      // ------------------------------------------------------------------
+      // Switch Map example
 
-
+      this.ytsearch.valueChanges.pipe(
+          debounceTime(500),
+          switchMap((searchTerm) => this.http.get<any>(`${environment.youtube.baseUrl}?q=${searchTerm}&key=${environment.youtube.apiKey}&part=snippet`))
+      ).subscribe((result) => {
+          console.log(result);
+          this.results = result.items;
       });
+
+      // ------------------------------------------------------------------
+      // Simple Search
+
+      // this.ytsearch.valueChanges.subscribe((searchtxt) => {
+      //
+      //     this.http.get<any>(`${environment.youtube.baseUrl}?q=${searchtxt}&key=${environment.youtube.apiKey}&part=snippet`).subscribe((result) => {
+      //         console.log(result);
+      //         this.results = result.items;
+      //     });
+      //
+      // });
   }
 
   onSearchTextChange({ target }): void {
@@ -65,9 +83,8 @@ export class YoutubesearchComponent implements OnInit {
       return await modal.present();
   }
 
-  loadDataVideos(event){
-      this.searchTextChanges(event);
-  }
-
+    loadDataVideos(event){
+        this.searchTextChanges(event);
+    }
 
 }
